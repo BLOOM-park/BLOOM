@@ -18,6 +18,9 @@ public class PauseMenu : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            // If the Fullscreen Big Map is open, let MinimapToggler close it first
+            if (MinimapToggler.IsAnyBigMapOpen) return;
+
             if (isPaused)
             {
                 Resume();

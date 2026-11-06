@@ -11,15 +11,20 @@ using TMPro;
 public class PickupPromptManager : MonoBehaviour
 {
     private static PickupPromptManager instance;
+    private static bool isQuitting = false;
+
+    public static bool HasInstance => instance != null && !isQuitting;
 
     public static PickupPromptManager Instance
     {
         get
         {
+            if (isQuitting) return null;
+
             if (instance == null)
             {
                 instance = FindFirstObjectByType<PickupPromptManager>();
-                if (instance == null)
+                if (instance == null && !isQuitting)
                 {
                     GameObject go = new GameObject("PickupPromptManager");
                     instance = go.AddComponent<PickupPromptManager>();
@@ -76,6 +81,8 @@ public class PickupPromptManager : MonoBehaviour
 
     private void Awake()
     {
+        isQuitting = false;
+
         if (instance != null && instance != this)
         {
             Destroy(gameObject);
@@ -83,10 +90,22 @@ public class PickupPromptManager : MonoBehaviour
         }
 
         instance = this;
-        DontDestroyOnLoad(gameObject);
 
         BuildPromptUI();
         SetVisible(false, true);
+    }
+
+    private void OnApplicationQuit()
+    {
+        isQuitting = true;
+    }
+
+    private void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
+        }
     }
 
     private void Start()

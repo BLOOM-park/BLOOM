@@ -7,6 +7,17 @@ public class CabinBed : MonoBehaviour
     private Transform playerTransform;
     private int lightsState = 0;
 
+    private void Start()
+    {
+        if (GetComponent<MapMarker>() == null)
+        {
+            MapMarker marker = gameObject.AddComponent<MapMarker>();
+            marker.markerType = MapMarker.MarkerType.Cabin;
+            marker.iconSize = 3.8f;
+            marker.heightOffset = 10f;
+        }
+    }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))

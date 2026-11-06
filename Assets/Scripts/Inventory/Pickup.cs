@@ -163,7 +163,7 @@ public class Pickup : MonoBehaviour
 
     void OnDisable()
     {
-        if (PickupPromptManager.Instance != null)
+        if (PickupPromptManager.HasInstance)
         {
             PickupPromptManager.Instance.UnregisterPickup(this);
         }
@@ -171,7 +171,7 @@ public class Pickup : MonoBehaviour
 
     void OnDestroy()
     {
-        if (PickupPromptManager.Instance != null)
+        if (PickupPromptManager.HasInstance)
         {
             PickupPromptManager.Instance.UnregisterPickup(this);
         }
@@ -226,7 +226,7 @@ public class Pickup : MonoBehaviour
                     Inventory.instance.AddItem(bagItem);
 
                     // Unregister prompt before destroying
-                    if (PickupPromptManager.Instance != null)
+                    if (PickupPromptManager.HasInstance)
                     {
                         PickupPromptManager.Instance.UnregisterPickup(this);
                     }
@@ -248,7 +248,7 @@ public class Pickup : MonoBehaviour
             Debug.Log("Pickup: Item is NOT trash. Picking up normally. ItemModel: " + (itemModel != null ? itemModel.name : "null"));
             Inventory.instance.AddItem(item);
 
-            if (PickupPromptManager.Instance != null)
+            if (PickupPromptManager.HasInstance)
             {
                 PickupPromptManager.Instance.UnregisterPickup(this);
             }

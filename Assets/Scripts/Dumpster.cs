@@ -6,6 +6,17 @@ public class Dumpster : MonoBehaviour
     public float interactionDistance = 3f;
     private Transform playerTransform;
 
+    private void Start()
+    {
+        if (GetComponent<MapMarker>() == null)
+        {
+            MapMarker marker = gameObject.AddComponent<MapMarker>();
+            marker.markerType = MapMarker.MarkerType.Dumpster;
+            marker.iconSize = 2.3f;
+            marker.heightOffset = 8f;
+        }
+    }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))
