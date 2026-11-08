@@ -5,6 +5,7 @@ public class InventorySlot : MonoBehaviour
 {
     public Image icon;
     public Button removeButton;
+    public GameObject highlightBorder;
 
     Item item;
 
@@ -19,6 +20,7 @@ public class InventorySlot : MonoBehaviour
         if (removeButton != null)
         {
             removeButton.interactable = true;
+            removeButton.gameObject.SetActive(true);
         }
     }
 
@@ -33,6 +35,15 @@ public class InventorySlot : MonoBehaviour
         if (removeButton != null)
         {
             removeButton.interactable = false;
+            removeButton.gameObject.SetActive(false);
+        }
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        if (highlightBorder != null)
+        {
+            highlightBorder.SetActive(isSelected);
         }
     }
 

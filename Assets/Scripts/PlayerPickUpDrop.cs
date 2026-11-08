@@ -18,6 +18,13 @@ public class PlayerPickUpDrop : MonoBehaviour
 
     private int lastIndex = -1;
     private string currentEquippedItemName = "";
+    private InventoryUI cachedInventoryUI;
+
+    private void UpdateHotbarUI()
+    {
+        if (cachedInventoryUI == null) cachedInventoryUI = FindFirstObjectByType<InventoryUI>();
+        if (cachedInventoryUI != null) cachedInventoryUI.SetSelectedSlot(lastIndex);
+    }
 
     public string CurrentEquippedItemName => currentEquippedItemName;
 
@@ -44,6 +51,7 @@ public class PlayerPickUpDrop : MonoBehaviour
     {
         // Ensure all tools are disabled at start
         DisableAllTools();
+        UpdateHotbarUI();
     }
 
     private void Update()
@@ -70,6 +78,7 @@ public class PlayerPickUpDrop : MonoBehaviour
                 DisableAllTools();
                 lastIndex = -1;
                 currentEquippedItemName = "";
+                UpdateHotbarUI();
                 return;
             }
 
@@ -77,6 +86,7 @@ public class PlayerPickUpDrop : MonoBehaviour
             DisableAllTools();
             lastIndex = index;
             currentEquippedItemName = item.name;
+            UpdateHotbarUI();
 
             Debug.Log($"Equipping Item: '{item.name}' at index {index}");
 
@@ -130,5 +140,6 @@ public class PlayerPickUpDrop : MonoBehaviour
         DisableAllTools();
         lastIndex = -1;
         currentEquippedItemName = "";
+        UpdateHotbarUI();
     }
 }

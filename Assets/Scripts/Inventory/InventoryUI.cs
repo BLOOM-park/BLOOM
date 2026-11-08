@@ -75,6 +75,27 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
+    public void SetSelectedSlot(int selectedIndex)
+    {
+        if (slots == null || slots.Length == 0)
+        {
+            if (itemsParent != null)
+                slots = itemsParent.GetComponentsInChildren<InventorySlot>(true);
+            else
+                slots = GetComponentsInChildren<InventorySlot>(true);
+        }
+
+        if (slots == null) return;
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] != null)
+            {
+                slots[i].SetSelected(i == selectedIndex);
+            }
+        }
+    }
+
     private void OnDestroy()
     {
         if (inventory != null)

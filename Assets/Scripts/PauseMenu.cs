@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using StarterAssets;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -7,8 +8,29 @@ public class PauseMenu : MonoBehaviour
 
     public GameObject pauseMenuUI;
 
+    private StarterAssetsInputs playerInputs;
+
+    private void FindPlayerInputs()
+    {
+        if (playerInputs == null)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                playerInputs = player.GetComponent<StarterAssetsInputs>();
+            }
+        }
+    }
+
     void Start()
     {
+        FindPlayerInputs();
+        if (playerInputs != null)
+        {
+            playerInputs.cursorLocked = true;
+            playerInputs.cursorInputForLook = true;
+        }
+
         // Ensure cursor is locked when game starts
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -43,14 +65,15 @@ public class PauseMenu : MonoBehaviour
         
         // Resume all audio
         AudioListener.pause = false;
-        
-        // Switch back to Display 1
-        if (Display.displays.Length > 0)
-        {
-            Display.displays[0].Activate();
-        }
-        
+
         // Lock cursor when resuming
+        FindPlayerInputs();
+        if (playerInputs != null)
+        {
+            playerInputs.cursorLocked = true;
+            playerInputs.cursorInputForLook = true;
+        }
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -61,14 +84,15 @@ public class PauseMenu : MonoBehaviour
         AudioListener.pause = true;
         
         // Unlock cursor when paused
+        FindPlayerInputs();
+        if (playerInputs != null)
+        {
+            playerInputs.cursorLocked = false;
+            playerInputs.cursorInputForLook = false;
+        }
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-
-        // Switch to Display 2
-        if (Display.displays.Length > 1)
-        {
-            Display.displays[1].Activate();
-        }
 
         if (pauseMenuUI != null)
         {

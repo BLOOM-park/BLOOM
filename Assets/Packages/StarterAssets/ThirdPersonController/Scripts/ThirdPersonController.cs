@@ -1,4 +1,4 @@
-﻿ using UnityEngine;
+ using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -279,7 +279,8 @@ namespace StarterAssets
             if (_hasAnimator)
             {
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
-                _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+                float motionSpeed = (_input.move == Vector2.zero) ? 1.0f : inputMagnitude;
+                _animator.SetFloat(_animIDMotionSpeed, motionSpeed);
             }
         }
 
