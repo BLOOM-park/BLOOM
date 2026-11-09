@@ -9,15 +9,23 @@ public class PauseMenu : MonoBehaviour
     public GameObject pauseMenuUI;
 
     private StarterAssetsInputs playerInputs;
+    private UnityEngine.InputSystem.PlayerInput playerInputComponent;
 
     private void FindPlayerInputs()
     {
-        if (playerInputs == null)
+        if (playerInputs == null || playerInputComponent == null)
         {
             GameObject player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
             {
                 playerInputs = player.GetComponent<StarterAssetsInputs>();
+                playerInputComponent = player.GetComponent<UnityEngine.InputSystem.PlayerInput>();
+
+                // CRITICAL: PlayerInput must NOT pair with uiInputModule because StarterAssets has no UI map!
+                if (playerInputComponent != null && playerInputComponent.uiInputModule != null)
+                {
+                    playerInputComponent.uiInputModule = null;
+                }
             }
         }
     }
@@ -25,6 +33,8 @@ public class PauseMenu : MonoBehaviour
     void Start()
     {
         FindPlayerInputs();
+        HookButtonListeners();
+
         if (playerInputs != null)
         {
             playerInputs.cursorLocked = true;
@@ -34,6 +44,33 @@ public class PauseMenu : MonoBehaviour
         // Ensure cursor is locked when game starts
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+
+    private void HookButtonListeners()
+    {
+        if (pauseMenuUI != null)
+        {
+            var resumeBtn = pauseMenuUI.transform.Find("Panel/buttonsalignment/Resume BTN")?.GetComponent<UnityEngine.UI.Button>();
+            if (resumeBtn != null)
+            {
+                resumeBtn.onClick.RemoveListener(Resume);
+                resumeBtn.onClick.AddListener(Resume);
+            }
+
+            var menuBtn = pauseMenuUI.transform.Find("Panel/buttonsalignment/MainMenu BTN")?.GetComponent<UnityEngine.UI.Button>();
+            if (menuBtn != null)
+            {
+                menuBtn.onClick.RemoveListener(LoadMenu);
+                menuBtn.onClick.AddListener(LoadMenu);
+            }
+
+            var quitBtn = pauseMenuUI.transform.Find("Panel/buttonsalignment/QuitGame BTN")?.GetComponent<UnityEngine.UI.Button>();
+            if (quitBtn != null)
+            {
+                quitBtn.onClick.RemoveListener(QuitGame);
+                quitBtn.onClick.AddListener(QuitGame);
+            }
+        }
     }
 
     void Update()
@@ -52,10 +89,23 @@ public class PauseMenu : MonoBehaviour
                 Pause();
             }
         }
+        else if (isPaused)
+        {
+            // Keep cursor unlocked and visible while paused
+            if (Cursor.lockState != CursorLockMode.None)
+            {
+                Cursor.lockState = CursorLockMode.None;
+            }
+            if (!Cursor.visible)
+            {
+                Cursor.visible = true;
+            }
+        }
     }
 
     public void Resume()
     {
+        Debug.Log("Resuming Game...");
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
@@ -66,8 +116,14 @@ public class PauseMenu : MonoBehaviour
         // Resume all audio
         AudioListener.pause = false;
 
-        // Lock cursor when resuming
+        // Re-enable PlayerInput for gameplay
         FindPlayerInputs();
+        if (playerInputComponent != null)
+        {
+            playerInputComponent.enabled = true;
+        }
+
+        // Lock cursor when resuming
         if (playerInputs != null)
         {
             playerInputs.cursorLocked = true;
@@ -83,8 +139,13 @@ public class PauseMenu : MonoBehaviour
         // Pause all audio
         AudioListener.pause = true;
         
-        // Unlock cursor when paused
+        // Find player and disable player character input while in pause menu
         FindPlayerInputs();
+        if (playerInputComponent != null)
+        {
+            playerInputComponent.enabled = false;
+        }
+
         if (playerInputs != null)
         {
             playerInputs.cursorLocked = false;
@@ -94,18 +155,50 @@ public class PauseMenu : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
+        // Ensure the UI Action Map and click actions are enabled for UI clicks
+        var uiModule = FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+        if (uiModule != null)
+        {
+            if (uiModule.actionsAsset != null)
+            {
+                var uiMap = uiModule.actionsAsset.FindActionMap("UI");
+                if (uiMap != null && !uiMap.enabled)
+                {
+                    uiMap.Enable();
+                }
+            }
+            if (uiModule.point != null && uiModule.point.action != null && !uiModule.point.action.enabled)
+            {
+                uiModule.point.action.Enable();
+            }
+            if (uiModule.leftClick != null && uiModule.leftClick.action != null && !uiModule.leftClick.action.enabled)
+            {
+                uiModule.leftClick.action.Enable();
+            }
+        }
+
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(true);
+            HookButtonListeners();
         }
 
         if (UnityEngine.EventSystems.EventSystem.current != null)
         {
-            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+            var resumeBtn = pauseMenuUI != null ? pauseMenuUI.transform.Find("Panel/buttonsalignment/Resume BTN") : null;
+            if (resumeBtn != null)
+            {
+                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(resumeBtn.gameObject);
+            }
+            else
+            {
+                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+            }
         }
 
         Time.timeScale = 0f;
         isPaused = true;
+        Debug.Log("Game Paused.");
     }
 
     public void LoadMenu()
